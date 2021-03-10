@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
   comment = NA,
   warning = FALSE,
   message = FALSE,
-  fig.path = "RTest/")
+  fig.path = "FWM Final Year/RTest/")
 ```
 
 ## **SEMINAR OUTLINE**
@@ -24,8 +24,7 @@ knitr::opts_chunk$set(
 - Data Analysis Overview
 - Introduction to R Studio
 - Statistics, Data and Variable
-- Analysis with R
-- Reporting
+- Analysis and Reporting with R
 - Visualization Techniques with R
 - Conclusion
 
@@ -546,7 +545,7 @@ Run the command **print(ls())**
 Variables can be deleted by using the **rm()** function.
 
 
-### **Data Analysis with R**
+### **Data Analysis and Reporting with R**
 
 In this section, it will be more of practical on the procedure to deriving meaningful insight from your data with R.
 
@@ -789,29 +788,407 @@ Parametric tests usually have more statistical power than their non-parametric e
 knitr::include_graphics("PNP.png")
 ```
 
+- **Hypothesis**
 
-**Deriving Insight from Qualitative Nominal Data**
+This is defined to be an assumption made with aim of calculating the probability of which the conc(lusion is incorrect. We have two types of it, they are;
+1. Null hypothesis
+2. Alternate hypothesis
 
-- **CHI_SQUARE TEST**
+The null hypothesis is the claim that is assumed to be true while the alternate hypothesis is what we are testing for against the null hypothesis.
 
-**H0:** Two nominal variables (row and colums) have no association between them
-whether or not there is an association between gender and food
+**NOTE**
 
-Entering data into vector
+-When H(alt) is define with the less than statement, it is one-sided and can be said to be a lower-tailed test.
 
-- **t-Test Application in R**
+-When H(alt) is defined with the greater than statement, it is one-sided and can also be said to be an upper-tailed test.
 
-- **Non-parametric alternative to t-Test**
+-When H(alt) is defined with the not equal to sign, it is two-sided and can also be called a two-tailed test.
+
+- **Hypothesis Testing**
+
+After setting up a hypothesis, it is good for us to make some assumptions before carrying out the parametric test. These assumptions are listed below;
+
+- We assume that the samples are taken at random and gives a perfect representation of the population without any element of bias.
+
+- For two or more populations, we assume the equality of variance.
+
+-  We assume that the population(s) is normally distributed.
+
+**t-Test Application in R**
+
+- **One Sample t-test**
+
+**Example**
+
+Ten individual trees were randomly chosen from a population and their diameters at 1.3m above the ground level were measured in cm. The data is presented below;
+
+25.46,31.51,17.04,30.10,38.40,31.19,37.56,41.70,21.01 and 41.83
+
+In the light of the above dta, could the mean diameter of the population be 28cm?
+
+```{r}
+dat <- c(25.46,31.51,17.04,30.10,38.40,31.19,37.56,41.70,21.01,41.83)
+dbh_test <- t.test(x=dat, mu=28, alternative = "less")
+print(dbh_test)
+
+names(dbh_test)
+attributes(dbh_test) ##same as above
+
+## To get the true C.I, we need to change the alternative argument to two sided.
+dbh_test1 <- t.test(x=dat, mu=28, alternative = "two.sided")
+names(dbh_test1)
+dbh_test1$conf.int
+```
+
+- **Exercise**
+
+Suppose a forester sells 16g of a tree seedling. A random sample of 9 seedlings were taken and weighed.
+15.5, 16.2, 16.1, 15.8, 15.6, 16.0, 15.8, 15.9, 16.2
+
+Is the average weight at least 16?
+
+**Answer**
+
+```{r}
+seedling <- c(15.5, 16.2, 16.1, 15.8, 15.6, 16.0, 15.8, 15.9, 16.2)
+s_test <- t.test(x= seedling, mu= 16, alternative = "less")
+print(s_test)
+```
+
+- **Unpaired/Independent Samples**
+
+**Unpooled Variance**: Here, we cannot assume the equality of variances of the two groups.
+
+**Example**
+
+Suppose the forester in the exercise above selects another 6 random samples of seedling and weighed them.
+14.7, 15.2, 16.6, 16.3, 15.4, 16.4
+
+Can we conclude that there is a difference between the mean of the two samples?
+
+```{r}
+seedling_samp <- c(14.7, 15.2, 16.6, 16.3, 15.4, 16.4)
+
+testObj <- t.test(x=seedling_samp, y=seedling, alternative = "greater", conf.level = 0.95)
+print(testObj)
+```
+
+**Pooled**: Here, we can assume equality of variance.
+
+**Example**
+
+Measurements on tree diameters from two different forest reserves were taken and recorded with the aim of accessing whether there is a difference between the mean diameter values obtained from the forest reserves. Perform a simple test confirming this.
+
+shasha: 102,87,101,96,107,101,91,85,108,67,85,82
+Ago-Owu: 73,81,111,109,143,95,92,120,93,89,119,79,90,126,62,92,77,106,105,111
+
+```{r}
+shasha <- c(102,87,101,96,107,101,91,85,108,67,85,82)
+ago_owu <- c(73,81,111,109,143,95,92,120,93,89,119,79,90,126,62,92,77,106,105,111)
+testResult <- t.test(x=shasha, y=ago_owu, alternative = "two.sided", conf.level = 0.95, var.equal = T)
+print(testResult)
+```
+
+- **Paired/Dependent Samples**
+
+Paired data occur when the measurements forming tow sets of observations are taken from the same individual.
+
+**Examples**
+
+A forester interested in the rate of growth of his gmelina arborea plantation takes a yearly measurement of the height of his trees and record them. The record for the first and second year are provide below:
+
+height before: 52,66,89,87,89,72,66,65,49,62,70,52,75,63,65,61
+
+height after: 51,66,71,73,70,68,60,51,40,57,65,53,64,56,60,59
+
+```{r}
+height_before <- c(52,66,89,87,89,72,66,65,49,62,70,52,75,63,65,61)
+height_after <- c(51,66,71,73,70,68,60,51,40,57,65,53,64,56,60,59)
+
+length(height_before); length(height_after)
+heightdiff <- height_after - height_before
+print(heightdiff)
+
+heightdiff_mean <- mean(heightdiff)
+heightdiff_sd <- sd(heightdiff)
+
+height_test <- heightdiff_mean / (heightdiff_sd/sqrt(16))
+print(height_test)
+
+p_val <- pt(height_test, df=15)
+print(p_val)
+```
+
+Doing this with a single line of code as usual.
+
+```{r}
+testObject <- t.test(x=height_after, y=height_before, alternative = "less", conf.level = .95, paired = T)
+print(testObject)
+```
+
+You can use the line of code below to get the confidence interval.
+
+```{r}
+CI <- heightdiff_mean + c(-1,1) * qt(0.975, df=15) * (heightdiff_sd/sqrt(16))
+print(CI)
+```
+
+**NOTE:**
+
+```{r}
+## It can also be used to examine the relationship between a numeric outcome variable y and a categorical explanatory variable with 2 levels. (yes,no)
+
+## boxplot(x~y)
+## t.test(y~x, mu=0, alt="two.sided", conf= 0.95, var.eq=F, paired=F)
+
+## t.test(y~x)
+## t.test(y[x=="no"], y[x=="yes"])
+
+```
+
+
+**Equality of Variance Test**
+
+```{r}
+## First with a boxplot
+## boxplot(y~x)  ensure both x and y are of the same length.
+
+## var(y); var(x)
+## var(y[x=="no]) ; var(y[x=="yes])
+
+## Levene's test
+
+## Null: Population variances are equal.
+## library(car)
+## leveneTest(y~x)
+```
+
+
+
+For chi-square analysis with R, please get a copy of my **book** ["Basic Statistics for Undergraduate Studies Using R"](https://www.amazon.com/BASIC-STATISTICS-UNDERGRADUATE-STUDIES-USING/dp/B08C4FTJFT).
 
 - **One-way ANOVA**
 
+```{r}
+head(chickwts)
+levels(chickwts$feed)
+library(dplyr)
+chick <- slice(chickwts, c(1:36))
+names(chick)
+str(chick)
+levels(chick$feed)
+
+stripchart(weight~feed, vertical= T, pch=19, data = chick, xlab="Feed type", method= "jitter", jitter = .004)
+
+result <- lm(weight~feed, data = chick)
+anova(result)
+plot(result, which = 1)
+## Here we can see that the overall variances are relatively homogenous for all the fitted values.
+
+plot(result, which = 2) ## Normality assumptions
+## Here we can see it follows the straight line except for a little skewness on top.
+plot(result)
+
+Res <- rstandard(result) ## for obtaining standardized residuals
+hist(Res)
+TukeyHSD(aov(result))
+## soybean and horsebean contributes most of the overall significance between the feed type.
+
+ ## Let us visualize this.
+stripchart(weight~feed, vertical= T, pch=19, data = chick, xlab="Feed type", method= "jitter", jitter = .004)
+
+library(agricolae)
+DMRT <- duncan.test(chick$weight, chick$feed, 33, 2470.6)
+print(DMRT)
+
+LSD <- LSD.test(chick$weight, chick$feed, 33, 2470.6)
+print(LSD)
+
+```
+
 - **Two-way ANOVA**
 
-- **Regression in R**
+This is just an extension of the one-way ANOVA that examines the influence of two different categorical indepenedent variable on one continuous dependent variable.
+
+* denotes interaction and : could be used as well. To add more than one predictor, the plus sign is used.
+
+```{r}
+## interaction.plot(c1, c2, response, xlab, ylab, trace.label=)
+
+```
 
 
-### **Reporting**
+- **Correlation and Regression in R**
+
+```{r}
+df = mtcars
+num.cols <- sapply(df, is.numeric)
+cor.data <- cor(df[, num.cols])
+print(cor.data)
+
+## library(DT)
+## datatable(cor.data, extensions = "buttons", options = list(
+##  dom = "Bfrtip",
+##  buttons = c("copy","csv","excel","pdf","print")
+## ))
+
+## Just for making a nice datatable with copy options.
+
+```
+
+
+```{r}
+library(corrgram)
+library(corrplot)
+
+print(corrplot(cor.data, method = "color"))
+```
+
 
 ### **Visualization Techniques with R**
 
+- **The Plot Function**
+
+For visualizing simple scatreplots. You can make reference to my new book for more examples of other plot functions.
+
+```{r}
+plot(trees$Girth,trees$Volume)
+## To add title
+plot(trees$Girth,trees$Volume, main = "Scatterplot of Girth and Volume")
+## To add labels
+plot(trees$Girth,trees$Volume, main = "Scatterplot of Girth and Volume",
+     xlab = "Girth", ylab = "Volume")
+
+```
+
+- **ggplot2**
+
+This is one of the most popular data visualization package for R created by Hadley Wickham. It follows a distict pattern of graphics and it builds on the ideas of adding layers.
+
+**ggplot2 layers**
+
+1. Data
+2. Aesthetics
+3. Geometry
+
+```{r}
+## Ensure ggplot2 package is installed on your software
+library(ggplot2)
+ggplot(data = mtcars) ## with this nothing will show up.
+ggplot(data = mtcars, aes(x=mpg, y=hp)) ## data + aesthetics
+
+pl <- ggplot(data = mtcars, aes(x=mpg, y=hp))
+pl + geom_point() ## point for scatterplot geometry.
+```
+
+
+4. Facets
+5. Statistics
+6. Coordinates
+7. Themes
+
+```{r}
+pl <- pl + geom_point()
+pl + facet_grid(cyl~.) ## Multiple plots of mpg vs hp seperated by cyl levels
+
+## Adding a smoot fit
+pl + facet_grid(cyl~.) + stat_smooth() ## provides an error measure
+
+## manipulating coordinates
+pl2 <- pl + facet_grid(cyl~.) + stat_smooth()
+pl2 + coord_cartesian(xlim = c(15,25)) ## For bringing in and out of the axes
+
+## Themes
+pl2 + coord_cartesian(xlim = c(15,25)) + theme_bw()
+```
+
+- **qplot**
+
+```{r}
+qplot(Sepal.Length, Sepal.Width, data=iris, color = Species)
+## Graph shwoing the relationship btw length and width of 3 different species
+
+qplot(Sepal.Length, Sepal.Width, data=iris)
+
+qplot(Sepal.Length, Sepal.Width, data=iris, color = Species, size = Petal.Width)
+## The bases for size is Petal width. So, Setosa have the smallest.
+
+##Adding labels to the plot
+qplot(Sepal.Length, Sepal.Width, data=iris, color = Species,
+      xlab = "Sepal Length", ylab = "Petal Length",
+      main = "Sepal Vs Petal Length in Iris Dataset")
+
+qplot(Sepal.Length, Sepal.Width, data=iris, geom = "line", color = Species)
+```
+
+```{r}
+## Distinguish between species using color scheme
+ggplot(data = iris, aes(Sepal.Length, Sepal.Width)) + geom_point(aes(color = (Species)))
+# OR
+ggplot(data = iris, aes(Sepal.Length, Sepal.Width, colour = Species)) + geom_point()
+
+ggplot(data = iris, aes(Sepal.Length, Sepal.Width, shape = Species)) + geom_point()
+```
+
+```{r}
+## Histogram
+ggplot(iris, aes(x= Sepal.Length)) +geom_histogram()
+
+ggplot(iris, aes(x= Sepal.Length, fill = Species)) +geom_histogram()
+
+## Boxplot
+ggplot(iris, aes(x= Species, y= Sepal.Length)) + geom_boxplot()
+
+## Visualizing relationship between variables for the 3 species
+ggplot(data = iris, aes(Sepal.Length, Sepal.Width)) + geom_point() + facet_grid(. ~ Species)
+
+ggplot(data = iris, aes(Sepal.Length, Sepal.Width)) + geom_point() + facet_grid(. ~ Species) + geom_smooth(method = "lm")
+```
+
+
+```{r}
+library(MASS)
+head(birthwt)
+
+## compare numerical variables across all categories
+ggplot(birthwt, aes(x= factor(race), y= bwt)) +geom_boxplot()
+
+## Do you notice the presence of an outlier?
+ggplot(birthwt, aes(x= factor(race), y= bwt)) +geom_boxplot() +ggtitle("Birthwt")
+ggplot(birthwt, aes(x= factor(race), y= bwt)) +geom_boxplot() + coord_flip()
+```
+
+```{r}
+### BARPLOT
+library(ggplot2)
+df <- mpg
+head(df)
+## Scatterplot have continuous data on the x but barplot have a categorical data.
+
+## They both have counts on their y axis
+pl <- ggplot(df, aes(x=class))
+print(pl + geom_bar())
+print(pl + geom_bar(color="blue")) ## for outline colour
+print(pl + geom_bar(color="blue", fill="pink"))
+
+## We can also define our fill with another factor column in the data frame. To do this, we will introduce the aes(inside the geom)
+print(pl + geom_bar(aes(fill=drv))) ## This will automatically create a stacked bar for us.
+print(pl + geom_bar(aes(fill=drv ), position = "dodge")) ## This helps in comparing
+print(pl + geom_bar(aes(fill=drv ), position = "fill")) ## This shows the percentage instead of count
+```
+
+
 ### **Conclusion**
+
+R is such an interesting programming language for statistical analysis, amazing visualization and reporting possibilities. To learn more, you need to read more and practice more.
+
+
+
+```{r KS, fig.cap="It's a great privilege.", out.width = '100%', echo=FALSE}
+knitr::include_graphics("KS.png")
+```
+
+
+```{r BFS, fig.cap="Get your copy", out.width = '100%', echo=FALSE}
+knitr::include_graphics("BFS.png")
+```

@@ -1192,3 +1192,12 @@ knitr::include_graphics("KS.png")
 ```{r BFS, fig.cap="Get your copy", out.width = '100%', echo=FALSE}
 knitr::include_graphics("BFS.png")
 ```
+
+```{r}
+library(usethis)
+?use_github
+## Scroll to the authentication section and setup PAT. Check repository.
+edit_r_environ() ## to set our PAT. Just paste the PAT generated.
+use_github(protocol = "https", auth_token = Sys.getenv("GITHUB_PAT"))
+```
+
